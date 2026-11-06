@@ -1,0 +1,59 @@
+# Agent definition for Agent Builder. The runtime builds the graph from this file.
+# Edit it in Agent Builder, or by hand: after changing a prompt or skill file, run
+# `agent-builder lock` to record the new hashes, then `agent-builder check`.
+apiVersion: agentbuilder.ravl.io/v1
+kind: Agent
+runtime: '>=1.0,<2'
+metadata:
+  name: bank-help-desk1
+  description: ''
+limits:
+  max_steps: 25
+nodes:
+  other:
+    type: llm
+    model:
+      provider: anthropic
+      name: claude-opus-5-5
+      max_tokens: 16000
+    prompt: prompts/other.md
+  creditcard:
+    type: llm
+    model:
+      provider: anthropic
+      name: claude-opus-5-5
+      max_tokens: 16000
+    prompt: prompts/creditcard.md
+  helpdesk:
+    type: router
+    model:
+      provider: anthropic
+      name: claude-opus-5-5
+      max_tokens: 16000
+    prompt: prompts/helpdesk.md
+    routes:
+      creditcard: creditcard
+      mortgage: mortgage
+      other: other
+  mortgage:
+    type: llm
+    model:
+      provider: anthropic
+      name: claude-opus-5-5
+      max_tokens: 16000
+    prompt: prompts/mortgage.md
+edges:
+- from: other
+  to: END
+- from: START
+  to: helpdesk
+- from: creditcard
+  to: END
+- from: mortgage
+  to: END
+integrity:
+  prompts:
+    prompts/creditcard.md: d8956b89afbd357140fa78bbc326820bcee47518563164d64b45f2344fc60ec1
+    prompts/helpdesk.md: 4b217671999e5bb75b8ceb0b12fcab831afc09b53acb4774273ef6f1b5b107e3
+    prompts/mortgage.md: 3506af96ceedefd26360d06b7de037545380426c9c5584b3f28f2be350346878
+    prompts/other.md: 1ed54b1186a5723a905b91d49a2543ec2625463a67ed6c154c1a8e03aaeebb02
